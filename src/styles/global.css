@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    --gray900: #121214;
+    --gray800: #202024;
+    --gray700: #29292e;
+    --gray600: #323238;
+    --gray300: #7C7C8A;
+    --gray200: #C4C4CC;
+    --gray100: #E1E1E6;
+
+    --red: #F75A68;
+    --red-dark: #AA2834;
+
+    --green: #00875F;
+    --green-dark: #015F43;
+    --green-light: #00B37E;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    @media (max-width: 1080px) {
+        font-size: 93.75%;
+    }
+
+    @media (max-width: 720px) {
+        font-size: 87.5%;
+    }
+}
+
+body {
+    background-color: var(--gray800);
+    -webkit-font-smoothing: antialiased;
+}
+
+body, input, textarea, button {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6, strong {
+    font-weight: 600;
+    line-height: 160%;
+}
+
+button {
+    cursor: pointer;
+    padding: 0.75rem 1.25rem;
+    border: 0;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 160%;
+}
+
+input {
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 160%;
+    background-color: var(--gray900);
+    width: 100%;
+}
+
+.green {
+    background-color: var(--green);
+    color: #fff;
+}
+
+.secondary {
+    background-color: var(--gray600);
+    color: #fff;
+}
