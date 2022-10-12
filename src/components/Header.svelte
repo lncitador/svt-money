@@ -2,15 +2,11 @@
     import logoSvg from "../assets/svelte.svg";
 </script>
 
-<header >
+<header>
     <div class="logo__name">
-        <img src={logoSvg} alt="Logo do svelte">
+        <img src={logoSvg} alt="Logo do svelte" />
         <h2>Money</h2>
     </div>
-
-    <button class="green">
-        Nova transação
-    </button>
 </header>
 
 <style>
@@ -21,6 +17,7 @@
         height: 212px;
         padding: 2.5rem 10rem;
         background: var(--gray900);
+        min-width: var(--min);
     }
 
     .logo__name {

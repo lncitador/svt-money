@@ -1,5 +1,9 @@
 <script>
-    import { ArrowCircleUp, ArrowCircleDown, CurrencyDollar } from "phosphor-svelte";
+    import {
+        ArrowCircleUp,
+        ArrowCircleDown,
+        CurrencyDollar,
+    } from "phosphor-svelte";
 </script>
 
 <grid>
@@ -17,7 +21,7 @@
         </header>
         <h1>R$ 500,00</h1>
     </section>
-    <section class="green" >
+    <section class="green">
         <header>
             <p>Total</p>
             <CurrencyDollar size={32} />
@@ -33,6 +37,7 @@
         grid-template-columns: repeat(3, 1fr);
         gap: 2rem;
         padding: 2.5rem 10rem;
+        min-width: var(--min);
     }
 
     section {

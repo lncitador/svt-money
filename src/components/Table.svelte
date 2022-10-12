@@ -1,90 +1,106 @@
 <script lang="ts">
-    type Row = {
-        title: string;
-        value: number;
-        type: 'deposit' | 'withdraw';
-        category: string;
-        date: Date;
-    };
+    import { currentPage, totalPages, filter } from "../store";
+    import { transactions } from "../service/api";
+    import { Query } from "@sveltestack/svelte-query";
 
-    let rows: Row[] = [
-        {
-            title: "Salary",
-            value: 5000,
-            type: "deposit",
-            category: "Job",
-            date: new Date("2020-01-01"),
-        },
-        {
-            title: "Freelancing",
-            value: 2000,
-            type: "deposit",
-            category: "Freelance",
-            date: new Date("2020-01-02"),
-        },
-        {
-            title: "New TV",
-            value: 700,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-03"),
-        },
-        {
-            title: "New Desk (Wooden)",
-            value: 150,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-05"),
-        },
-        {
-            title: "New Desk (Metal)",
-            value: 250,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-05"),
-        },
-        {
-            title: "New Desk (Plastic)",
-            value: 50,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-05"),
-        },
-        {
-            title: "New Desk (Glass)",
-            value: 350,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-05"),
-        },
-        {
-            title: "New Desk (Plastic)",
-            value: 50,
-            type: "withdraw",
-            category: "Shopping",
-            date: new Date("2020-01-05"),
-        }
-    ]
+    let page: number = 1;
+    let search: string = "";
+
+    currentPage.subscribe((it) => {
+        page = it;
+    });
+
+    filter.subscribe((it) => {
+        search = it;
+    });
+
+    function formatCurrency(num: number) {
+        return num.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+        });
+    }
+
+    function formatDate(date: string | Date) {
+        return new Date(date).toLocaleDateString("pt-BR");
+    }
+
+    console.log(page);
 </script>
 
-<table>
-    <tbody>
-        {#each rows as row}
-            <tr>
-                <td>{row.title}</td>
-                <td>{row.value}</td>
-                <td>{row.category}</td>
-                <td>{row.date.toDateString()}</td>
-            </tr>
-        {/each}
-    </tbody>
-</table>
+<Query
+    options={{
+        queryKey: ["transactions", page, search],
+        queryFn: () =>
+            transactions.get({
+                _page: page,
+                _limit: 8,
+                _sort: "date",
+                _order: "desc",
+                q: search,
+            }),
+        onSuccess: ({ headers }) => {
+            const link = headers.link
+                .split(",")
+                .map((part) => part.split(";"))
+                .reduce(
+                    (acc, part) => {
+                        const [url, rel] = part;
+                        const key = rel?.split("=")[1].replace(/"/g, "");
+                        const value = url?.split(">")[0].replace(/</g, "");
+
+                        return { ...acc, [key]: value };
+                    },
+                    { last: "" }
+                );
+
+            $totalPages =
+                +link?.last
+                    .split("?")
+                    .map((part) => part.split("&"))
+                    .flat()
+                    .find((part) => part.includes("_page="))
+                    ?.split("=")[1] ?? 1;
+        },
+        keepPreviousData: true,
+    }}
+>
+    <div class="query" slot="query" let:queryResult>
+        {#if queryResult.isLoading}
+            <span>Loading...</span>
+        {:else if queryResult.isError}
+            <span>Error: {queryResult.error}</span>
+        {:else}
+            <table>
+                <tbody>
+                    {#each queryResult.data.data as row}
+                        <tr>
+                            <td>{row.title}</td>
+                            <td class={row.type} style="width: 25%;">
+                                {#if row.type === "withdrawal" || row.type === "invoice"}
+                                    -
+                                {:else}
+                                    &nbsp;
+                                {/if}
+                                {formatCurrency(row.value)}
+                            </td>
+                            <td style="width: 25%;">{row.category}</td>
+                            <td style="width: 10%;">{formatDate(row.date)}</td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        {/if}
+    </div>
+</Query>
 
 <style>
     table {
         width: 100%;
+        height: 5rem;
         border-spacing: 0 0.5rem;
         padding: 0 10rem;
+        min-width: var(--min);
     }
 
     table td {
@@ -100,5 +116,29 @@
 
     table td:last-child {
         border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    table td.deposit {
+        color: var(--green);
+    }
+
+    table td.withdrawal {
+        color: var(--red);
+    }
+
+    table td.payment {
+        color: var(--green);
+    }
+
+    table td.invoice {
+        color: var(--red);
+    }
+
+    .query {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        height: 30rem;
+        min-width: var(--min);
     }
 </style>

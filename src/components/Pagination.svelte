@@ -1,15 +1,22 @@
-<script>
+<script lang="ts">
     import { CaretLeft, CaretRight } from "phosphor-svelte";
-    let pages = [1, 2, 3]
-    let currentPage = 1
+    import { currentPage, totalPages } from "../store";
 
-    const righyColor = currentPage === pages.at(-1)
-        ? "var(--gray600)"
-        : "var(--green)"
+    let pages: number[] = [];
 
-    const leftColor = currentPage === pages[0]
-        ? "var(--gray600)"
-        : "var(--green)"
+    totalPages.subscribe(total => {
+        pages = Array.from({ length: total }, (_, i) => i + 1);
+    });
+
+    const righyColor =
+        $currentPage === pages.at(-1) ? "var(--gray600)" : "var(--green)";
+
+    const leftColor =
+        $currentPage === pages[0] ? "var(--gray600)" : "var(--green)";
+
+    const handleClick = (page: number) => () => {
+        currentPage.update(() => page);
+    };
 </script>
 
 <footer>
@@ -18,19 +25,19 @@
             <li>
                 <CaretLeft size={24} color={leftColor} />
             </li>
-        {#each pages as page}
+            {#each pages as page}
+                <li>
+                    <a
+                        href={`${page}`}
+                        class:active={page === $currentPage}
+                        on:click|preventDefault={handleClick(page)}
+                    >
+                        {page}
+                    </a>
+                </li>
+            {/each}
             <li>
-            <a
-                href="#"
-                class:active={page === currentPage}
-                on:click|preventDefault={() => currentPage = page}
-            >
-                {page}
-            </a>
-            </li>
-        {/each}
-            <li>
-                <CaretRight size={24} color={righyColor}  />
+                <CaretRight size={24} color={righyColor} />
             </li>
         </ul>
     </nav>
@@ -51,7 +58,7 @@
         gap: 1rem;
         list-style: none;
     }
-    
+
     footer nav ul li {
         display: flex;
         align-items: center;
