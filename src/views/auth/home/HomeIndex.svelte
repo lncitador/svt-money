@@ -14,7 +14,7 @@
     export let { currentRoute, params } = {} as RouteProps;
     let email: string;
 
-    const transactions = useQuery(
+    let transactions = useQuery(
         ["transactions", email],
         () =>
             graphql
@@ -35,7 +35,7 @@
                     { email: $user.email }
                 )
                 .then(({ data }) => data.transactions),
-        { enabled: !!email?.length }
+        { enabled: !!email }
     );
 
     user.subscribe((user) => {

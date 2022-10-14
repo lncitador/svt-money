@@ -6,4 +6,4 @@ export const graphql = new GraphQLClient(url)
 
 export type Error = {
     message: string
-}
+}[]

@@ -58,6 +58,8 @@
                 email: $user.email,
             }
         );
+    }, {
+        enabled: !!$user.email?.length,
     });
 </script>
 
