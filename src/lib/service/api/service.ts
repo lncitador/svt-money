@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
-import { axiosInstance } from "../../lib/axios";
+import { axiosInstance } from "src/lib/axios";
 
 type QueryProps = Record<string, unknown>
 type Post<T> = Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
@@ -30,19 +30,19 @@ export class ApiService<T = never, R = T> {
         return axiosInstance.get<R>(url);
     }
 
-    public async post(data: Post<T>, v?: string): Promise<R>
-    public async post(data: Post<T>, config?: AxiosRequestConfig, v?: string): Promise<R>
+    public async post(data: Post<T>, v?: string): Promise<any>
+    public async post(data: Post<T>, config?: AxiosRequestConfig, v?: string): Promise<any>
     public async post(data: Post<T>, arg1?: AxiosRequestConfig | string, arg2?: string) {
         if (!arg1) {
             return axiosInstance.post<Post<T>, R>(
                 `v1/${this.DOMAIN_REF}`,
                 data as T,
-            ) as unknown as Promise<R>;
+            );
         } else if (typeof arg1 === 'string') {
             return axiosInstance.post<Post<T>, R>(
                 `${arg1}/${this.DOMAIN_REF}`,
                 data as T,
-            ) as unknown as Promise<R>;
+            );
         } else {
             return axiosInstance.post<Post<T>, R>(
                 `${arg2 || 'v1'}/${this.DOMAIN_REF}`,

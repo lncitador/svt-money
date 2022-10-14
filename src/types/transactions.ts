@@ -1,3 +1,5 @@
+import type { UseQueryStoreResult } from "@sveltestack/svelte-query";
+
 export enum TransactionsType {
     deposit = 'deposit',
     withdraw = 'withdrawal',
@@ -11,4 +13,10 @@ export interface Transactions {
     type: TransactionsType
     category: string;
     date: Date;
+}
+
+export type TransactionsStore = UseQueryStoreResult<Transactions[]>
+
+export type TransactionMutation = Transactions & {
+    email: string;
 }
