@@ -1,4 +1,10 @@
-<script lang="ts" context="module">
+<script lang="ts">
+    import CircularLoading from "src/components/CircularLoading.svelte";
+    import { X, ArrowCircleUp, ArrowCircleDown } from "phosphor-svelte";
+    import { field, form } from "svelte-forms";
+    import { required } from "svelte-forms/validators";
+    import { newTransactionModal, currentPage, user } from "src/lib/store";
+
     import type {
         Transactions,
         ErrorResult,
@@ -9,7 +15,7 @@
     import { graphql } from "src/lib/graphql";
     import { gql } from "graphql-request";
 
-    export const mutation = useMutation<
+    const mutation = useMutation<
         Transactions,
         ErrorResult,
         TransactionMutation
@@ -43,14 +49,6 @@
             variables
         )
     );
-</script>
-
-<script lang="ts">
-    import CircularLoading from "src/components/CircularLoading.svelte";
-    import { X, ArrowCircleUp, ArrowCircleDown } from "phosphor-svelte";
-    import { field, form } from "svelte-forms";
-    import { required } from "svelte-forms/validators";
-    import { newTransactionModal, currentPage, user } from "src/lib/store";
 
     const title = field("title", "", [required()]);
     const value = field("value", "", [required()]);
@@ -62,13 +60,8 @@
     const queryClient = useQueryClient();
 
     function handleClose() {
-        newTransactionModal.update((prev) => {
-            if (prev) {
-                data.reset();
-            }
-
-            return !prev;
-        });
+        newTransactionModal.set(false);
+        data.reset();
     }
 
     async function handleSubmit() {
@@ -98,6 +91,10 @@
                 }
             );
         }
+    }
+
+    $: {
+        console.log($newTransactionModal);
     }
 </script>
 

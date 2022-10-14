@@ -26,41 +26,47 @@
         return new Date(date).toLocaleDateString("pt-BR");
     }
 
-    const queryResult = useQuery(["transactions", page, search], () => {
-        return graphql.request(
-            gql`
-                query (
-                    $_search: String = ""
-                    $email: String!
-                    $first: Int = 10
-                    $skip: Int = 1
-                ) {
-                    transactions(
-                        first: $first
-                        skip: $skip
-                        where: {
-                            _search: $_search
-                            authUser: { email: $email }
-                        }
+    const queryResult = useQuery(
+        ["transactions", page, search],
+        async () => {
+            const response = await graphql.request(
+                gql`
+                    query (
+                        $_search: String = ""
+                        $email: String!
+                        $first: Int = 10
+                        $skip: Int = 1
                     ) {
-                        category
-                        createdAt
-                        title
-                        type
-                        value
+                        transactions(
+                            first: $first
+                            skip: $skip
+                            where: {
+                                _search: $_search
+                                authUser: { email: $email }
+                            }
+                        ) {
+                            category
+                            createdAt
+                            title
+                            type
+                            value
+                        }
                     }
+                `,
+                {
+                    _search: search,
+                    first: 8,
+                    skip: page * 8 - 8,
+                    email: $user.email,
                 }
-            `,
-            {
-                _search: search,
-                first: 8,
-                skip: page * 8 - 8,
-                email: $user.email,
-            }
-        );
-    }, {
-        enabled: !!$user.email?.length,
-    });
+            );
+
+            return response.transactions;
+        },
+        {
+            enabled: !!$user,
+        }
+    );
 </script>
 
 <div class="query container">
@@ -68,10 +74,12 @@
         <div class="secondary skeleton" />
     {:else if $queryResult.isError}
         <span>Error: {$queryResult.error}</span>
+    {:else if $queryResult.data.length === 0}
+        <span>Nenhuma transação encontrada</span>
     {:else}
         <table>
             <tbody>
-                {#each $queryResult.data as row}
+                {#each $queryResult.data ?? [] as row}
                     <tr>
                         <td>{row.title}</td>
                         <td class={row.type} style="width: 25%;">
@@ -92,6 +100,13 @@
 </div>
 
 <style>
+    span {
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+        color: var(--gray200);
+    }
+
     table {
         width: 100%;
         height: 5rem;

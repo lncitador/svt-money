@@ -4,25 +4,55 @@
         ArrowCircleDown,
         CurrencyDollar,
     } from "phosphor-svelte";
-    import type { Transactions, TransactionsStore } from "src/types";
+
+    import type { Transactions } from "src/types";
+    import { user, isLoading } from "src/lib/store";
+    import { useQuery } from "@sveltestack/svelte-query";
+    import { graphql } from "src/lib/graphql";
+    import { gql } from "graphql-request";
+
+    let enabled = false;
+
+    let transactions = useQuery(["transactions", $user.email], async () => {
+        const respose = await graphql.request(
+            gql`
+                query ($email: String!) {
+                    transactions(where: { authUser: { email: $email } }) {
+                        id
+                        title
+                        type
+                        value
+                        createdAt
+                    }
+                }
+            `,
+            { email: $user.email }
+        );
+
+        isLoading.set(false);
+
+        return respose.transactions;
+    });
+
+    $: transactions.setEnabled(enabled);
 
     let entradas: string;
     let saidas: string;
     let total: string;
 
-    export let data: TransactionsStore;
-
     function getValueBy(param: "deposit" | "withdrawal") {
         return (transactions: Transactions[]) => {
-            return transactions
-                ?.filter((it) => it.type === param)
-                .reduce((acc, act) => acc + act.value, 0);
+            return (
+                transactions
+                    ?.filter((it) => it.type === param)
+                    ?.reduce((acc, act) => acc + act.value, 0) ?? 0
+            );
         };
     }
 
-    data.subscribe(({ data }) => {
-        const ent = getValueBy("deposit")(data) ?? 0;
-        const sai = getValueBy("withdrawal")(data) ?? 0;
+    transactions.subscribe((subscription) => {
+        const ent = getValueBy("deposit")(subscription.data) ?? 0;
+        const sai = getValueBy("withdrawal")(subscription.data) ?? 0;
 
         total = (ent - sai)?.toLocaleString("pt-BR", {
             style: "currency",
@@ -42,11 +72,11 @@
 </script>
 
 <grid class="container">
-    {#if $data.isLoading}
+    {#if $transactions.isLoading}
         <section class="secondary skeleton" />
         <section class="secondary skeleton" />
         <section class="green skeleton" />
-    {:else if $data.isError}
+    {:else if $transactions.isError}
         <span>Error: $data.data.message </span>
     {:else}
         <section class="secondary">

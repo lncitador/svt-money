@@ -24,6 +24,8 @@
             const userData = await auth0Client.getUser();
             user.set(userData);
 
+            console.log("user", userData);
+
             if (currentRoute.name === "/") {
                 navigateTo("/home");
             }

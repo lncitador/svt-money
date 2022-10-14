@@ -2,9 +2,8 @@
     import { MagnifyingGlass, XCircle } from "phosphor-svelte";
     import { field } from "svelte-forms";
     import { filter, currentPage, newTransactionModal } from "src/lib/store";
-    import type { TransactionsStore } from "src/types";
 
-    export let data: TransactionsStore;
+    import { isLoading } from "src/lib/store";
 
     const input = field<string>("filter", "");
 
@@ -22,21 +21,16 @@
     }
 
     function handleOpen() {
-        newTransactionModal.update((prev) => !prev);
+        console.log("open");
+        newTransactionModal.set(true);
     }
-
-    data.subscribe(({ data }) => {
-        console.log(data);
-    })
 </script>
 
-{#if $data.isLoading}
+{#if $isLoading}
     <section class="container">
         <div class="secondary skeleton" />
         <div class="green skeleton" />
     </section>
-{:else if $data.isError}
-    <span> Error: $data.data.message </span>
 {:else}
     <section class="container">
         <aside>
