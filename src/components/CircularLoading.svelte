@@ -1,7 +1,3 @@
-<div class="loader">
-    <span />
-</div>
-
 <style>
     .loader {
         height: 24px;
@@ -56,7 +52,7 @@
         }
     }
     .loader span::after {
-        content: "";
+        content: '';
         position: absolute;
         top: 0;
         left: 0;
@@ -68,8 +64,7 @@
         clip: rect(0, 24px, 24px, 12px);
         border: 3px solid #fff;
         border-radius: 50%;
-        -webkit-animation: loader-3 1.2s cubic-bezier(0.77, 0, 0.175, 1)
-            infinite;
+        -webkit-animation: loader-3 1.2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
         animation: loader-3 1.2s cubic-bezier(0.77, 0, 0.175, 1) infinite;
     }
     @-webkit-keyframes loader-3 {
@@ -95,3 +90,7 @@
         }
     }
 </style>
+
+<div class="loader">
+    <span />
+</div>

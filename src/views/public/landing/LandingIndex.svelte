@@ -1,14 +1,14 @@
 <script>
-    import Header from "src/components/Header.svelte";
-    import Footer from "./Footer.svelte";
-    import Hero from "./Hero.svelte";
-    import Main from "./Main.svelte";
-    import Subscription from "./Subscription.svelte";
+    import Header from 'src/components/Header.svelte'
+    import Footer from './Footer.svelte'
+    import Hero from './Hero.svelte'
+    import Main from './Main.svelte'
+    import Subscription from './Subscription.svelte'
 
-    export let currentRoute, params;
+    export let currentRoute, params
 </script>
 
-<Header currentRoute={currentRoute} params={params} />
+<Header {currentRoute} {params} />
 <Hero />
 <Main />
 <Subscription />

@@ -1,104 +1,3 @@
-<script lang="ts">
-    import { useQuery } from "@sveltestack/svelte-query";
-    import { gql } from "graphql-request";
-    import { graphql } from "src/lib/graphql";
-    import { currentPage, filter, user } from "src/lib/store";
-
-    let page: number = 1;
-    let search: string = "";
-
-    currentPage.subscribe((it) => {
-        page = it;
-    });
-
-    filter.subscribe((it) => {
-        search = it;
-    });
-
-    function formatCurrency(num: number) {
-        return num.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-    }
-
-    function formatDate(date: string | Date) {
-        return new Date(date).toLocaleDateString("pt-BR");
-    }
-
-    const queryResult = useQuery(
-        ["transactions", page, search],
-        async () => {
-            const response = await graphql.request(
-                gql`
-                    query (
-                        $_search: String = ""
-                        $email: String!
-                        $first: Int = 10
-                        $skip: Int = 1
-                    ) {
-                        transactions(
-                            first: $first
-                            skip: $skip
-                            where: {
-                                _search: $_search
-                                authUser: { email: $email }
-                            }
-                        ) {
-                            category
-                            createdAt
-                            title
-                            type
-                            value
-                        }
-                    }
-                `,
-                {
-                    _search: search,
-                    first: 8,
-                    skip: page * 8 - 8,
-                    email: $user.email,
-                }
-            );
-
-            return response.transactions;
-        },
-        {
-            enabled: !!$user,
-        }
-    );
-</script>
-
-<div class="query container">
-    {#if $queryResult.isLoading}
-        <div class="secondary skeleton" />
-    {:else if $queryResult.isError}
-        <span>Error: {$queryResult.error}</span>
-    {:else if $queryResult.data.length === 0}
-        <span>Nenhuma transação encontrada</span>
-    {:else}
-        <table>
-            <tbody>
-                {#each $queryResult.data ?? [] as row}
-                    <tr>
-                        <td>{row.title}</td>
-                        <td class={row.type} style="width: 25%;">
-                            {#if row.type === "withdrawal" || row.type === "invoice"}
-                                -
-                            {:else}
-                                &nbsp;
-                            {/if}
-                            {formatCurrency(row.value)}
-                        </td>
-                        <td style="width: 25%;">{row.category}</td>
-                        <td style="width: 10%;">{formatDate(row.date)}</td>
-                    </tr>
-                {/each}
-            </tbody>
-        </table>
-    {/if}
-</div>
-
 <style>
     span {
         display: block;
@@ -157,3 +56,84 @@
         border-radius: 0.25rem;
     }
 </style>
+
+<script lang="ts">
+    import { Query } from '@sveltestack/svelte-query'
+    import { useTransactionQueryFn } from 'src/lib/service/api/schemas/_transactions'
+    import { currentPage, filter, user } from 'src/lib/store'
+    import type { TransactionQueryVariables } from 'src/types'
+
+    const limit = 8
+
+    let variables: TransactionQueryVariables
+    let sub: string;
+
+    $: sub = $user && $user.sub!;
+
+    $: variables = {
+        where: {
+            _search: $filter,
+            authUser: {
+                sub,
+            }
+        },
+        first: limit,
+        skip: $currentPage * limit - limit,
+        orderBy: {
+            createdAt: 'DESC',
+        },
+    }
+
+    function formatCurrency(num: number) {
+        return num.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        })
+    }
+
+    function formatDate(date: string | Date) {
+        return new Date(date).toLocaleDateString('pt-BR')
+    }
+</script>
+
+<Query
+    options={{
+        queryKey: ['transactions', variables],
+        queryFn: useTransactionQueryFn,
+        enabled: !!variables?.where?.authUser?.sub
+    }}
+>
+    <div class="query container" slot="query" let:queryResult>
+        {#if queryResult.isLoading}
+            <div class="secondary skeleton" />
+        {:else if queryResult.isError}
+            <span
+                >Error: <br />
+                <pre>{JSON.stringify(queryResult.error, null, 4)}</pre></span
+            >
+        {:else if queryResult.data && queryResult.data.length === 0}
+            <span>Nenhuma transação encontrada</span>
+        {:else if queryResult.data && queryResult.data.length > 0}
+            <table>
+                <tbody>
+                    {#each queryResult.data as row}
+                        <tr>
+                            <td>{row.title}</td>
+                            <td class={row.type} style="width: 25%;">
+                                {#if row.type === 'WITHDRAWAL'}
+                                    -
+                                {:else}
+                                    &nbsp;
+                                {/if}
+                                {formatCurrency(row.value)}
+                            </td>
+                            <td style="width: 25%;">{row.category}</td>
+                            <td style="width: 10%;">{formatDate(row.createdAt)}</td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        {/if}
+    </div>
+</Query>
+<div  />

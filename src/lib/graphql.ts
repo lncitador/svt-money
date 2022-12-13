@@ -1,6 +1,6 @@
-import { GraphQLClient } from "graphql-request";
+import { GraphQLClient } from 'graphql-request'
 
-const url = import.meta.env.VITE_API_BASE_URL;
+const url = import.meta.env.VITE_API_BASE_URL
 
 export const graphql = new GraphQLClient(url)
 

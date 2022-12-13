@@ -1,61 +1,3 @@
-<script lang="ts">
-    import { MagnifyingGlass, XCircle } from "phosphor-svelte";
-    import { field } from "svelte-forms";
-    import { filter, currentPage, newTransactionModal } from "src/lib/store";
-
-    import { isLoading } from "src/lib/store";
-
-    const input = field<string>("filter", "");
-
-    input.subscribe((it) => {
-        setTimeout(() => {
-            currentPage.set(1);
-            filter.set(it.value);
-        }, 500);
-    });
-
-    function handleClear() {
-        input.set("");
-        filter.set("");
-        currentPage.set(1);
-    }
-
-    function handleOpen() {
-        console.log("open");
-        newTransactionModal.set(true);
-    }
-</script>
-
-{#if $isLoading}
-    <section class="container">
-        <div class="secondary skeleton" />
-        <div class="green skeleton" />
-    </section>
-{:else}
-    <section class="container">
-        <aside>
-            <input
-                type="text"
-                placeholder="Busque uma transação"
-                bind:value={$input.value}
-                class={$input.value && "active"}
-            />
-            <a
-                href="close"
-                class={$input.value ? "active" : "disabled"}
-                on:click|preventDefault={handleClear}
-            >
-                {#if $input.value}
-                    <XCircle size={24} />
-                {:else}
-                    <MagnifyingGlass size={24} />
-                {/if}
-            </a>
-        </aside>
-        <button on:click={handleOpen}> Nova transação </button>
-    </section>
-{/if}
-
 <style>
     section {
         display: flex;
@@ -108,3 +50,61 @@
         min-width: 200px;
     }
 </style>
+
+<script lang="ts">
+    import { MagnifyingGlass, XCircle } from 'phosphor-svelte'
+    import { field } from 'svelte-forms'
+    import { filter, currentPage, newTransactionModal } from 'src/lib/store'
+
+    import { isLoading } from 'src/lib/store'
+
+    const input = field<string>('filter', '')
+
+    input.subscribe(it => {
+        setTimeout(() => {
+            currentPage.set(1)
+            filter.set(it.value)
+        }, 500)
+    })
+
+    function handleClear() {
+        input.set('')
+        filter.set('')
+        currentPage.set(1)
+    }
+
+    function handleOpen() {
+        console.log('open')
+        newTransactionModal.set(true)
+    }
+</script>
+
+{#if $isLoading}
+    <section class="container">
+        <div class="secondary skeleton" />
+        <div class="green skeleton" />
+    </section>
+{:else}
+    <section class="container">
+        <aside>
+            <input
+                type="text"
+                placeholder="Busque uma transação"
+                bind:value={$input.value}
+                class={$input.value && 'active'}
+            />
+            <a
+                href="close"
+                class={$input.value ? 'active' : 'disabled'}
+                on:click|preventDefault={handleClear}
+            >
+                {#if $input.value}
+                    <XCircle size={24} />
+                {:else}
+                    <MagnifyingGlass size={24} />
+                {/if}
+            </a>
+        </aside>
+        <button on:click={handleOpen}> Nova transação </button>
+    </section>
+{/if}

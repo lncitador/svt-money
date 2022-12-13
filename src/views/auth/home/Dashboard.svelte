@@ -1,108 +1,3 @@
-<script lang="ts">
-    import {
-        ArrowCircleUp,
-        ArrowCircleDown,
-        CurrencyDollar,
-    } from "phosphor-svelte";
-
-    import type { Transactions } from "src/types";
-    import { user, isLoading } from "src/lib/store";
-    import { useQuery } from "@sveltestack/svelte-query";
-    import { graphql } from "src/lib/graphql";
-    import { gql } from "graphql-request";
-
-    let enabled = false;
-
-    let transactions = useQuery(["transactions", $user.email], async () => {
-        const respose = await graphql.request(
-            gql`
-                query ($email: String!) {
-                    transactions(where: { authUser: { email: $email } }) {
-                        id
-                        title
-                        type
-                        value
-                        createdAt
-                    }
-                }
-            `,
-            { email: $user.email }
-        );
-
-        isLoading.set(false);
-
-        return respose.transactions;
-    });
-
-    $: transactions.setEnabled(enabled);
-
-    let entradas: string;
-    let saidas: string;
-    let total: string;
-
-    function getValueBy(param: "deposit" | "withdrawal") {
-        return (transactions: Transactions[]) => {
-            return (
-                transactions
-                    ?.filter((it) => it.type === param)
-                    ?.reduce((acc, act) => acc + act.value, 0) ?? 0
-            );
-        };
-    }
-
-    transactions.subscribe((subscription) => {
-        const ent = getValueBy("deposit")(subscription.data) ?? 0;
-        const sai = getValueBy("withdrawal")(subscription.data) ?? 0;
-
-        total = (ent - sai)?.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-
-        saidas = sai?.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-
-        entradas = ent?.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-        });
-    });
-</script>
-
-<grid class="container">
-    {#if $transactions.isLoading}
-        <section class="secondary skeleton" />
-        <section class="secondary skeleton" />
-        <section class="green skeleton" />
-    {:else if $transactions.isError}
-        <span>Error: $data.data.message </span>
-    {:else}
-        <section class="secondary">
-            <header>
-                <p>Entradas</p>
-                <ArrowCircleUp color="var(--green)" size={32} />
-            </header>
-            <h1>{entradas}</h1>
-        </section>
-        <section class="secondary">
-            <header>
-                <p>Saídas</p>
-                <ArrowCircleDown color="var(--red)" size={32} />
-            </header>
-            <h1>{saidas}</h1>
-        </section>
-        <section class={total.includes("-") ? "red" : "green"}>
-            <header>
-                <p>Total</p>
-                <CurrencyDollar size={32} />
-            </header>
-            <h1>{total}</h1>
-        </section>
-    {/if}
-</grid>
-
 <style>
     grid {
         margin-top: -5rem;
@@ -131,3 +26,98 @@
         font-weight: 400;
     }
 </style>
+
+<script lang="ts">
+    import { ArrowCircleUp, ArrowCircleDown, CurrencyDollar } from 'phosphor-svelte'
+
+    import type { TransactionQueryVariables, Transactions, TransactionsType } from 'src/types'
+    import { user } from 'src/lib/store'
+    import { useTransactionQuery, useTransactionQueryFn } from 'src/lib/service/api'
+
+    let variables: TransactionQueryVariables;
+    let sub: string;
+
+    $: sub = $user && $user.sub!;
+
+    $: variables = {
+        where: {
+            authUser: { sub }
+        }
+    }
+
+    const queryResult = useTransactionQuery(variables, {
+        enabled: !!variables?.where?.authUser?.sub
+    })
+
+    $: {
+        queryResult.setOptions({
+            queryKey: ["transactions", variables],
+            queryFn: useTransactionQueryFn
+        })
+    }
+
+    let entradas: string
+    let saidas: string
+    let total: string
+
+    function getValueBy(param: TransactionsType) {
+        return (transactions?: Transactions[]) => {
+            return (
+                transactions
+                    ?.filter(it => it.type === param)
+                    ?.reduce((acc, act) => acc + act.value, 0) ?? 0
+            )
+        }
+    }
+
+    queryResult.subscribe(subscription => {
+        const ent = getValueBy('DEPOSIT')(subscription.data)
+        const sai = getValueBy('WITHDRAWAL')(subscription.data)
+
+        total = (ent - sai)?.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        })
+
+        saidas = sai?.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        })
+
+        entradas = ent?.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        })
+    })
+</script>
+<grid class="container">
+    {#if $queryResult.isLoading}
+        <section class="secondary skeleton" />
+        <section class="secondary skeleton" />
+        <section class="green skeleton" />
+    {:else if $queryResult.isError}
+        <span>Error: $data.data.message </span>
+    {:else}
+        <section class="secondary">
+            <header>
+                <p>Entradas</p>
+                <ArrowCircleUp color="var(--green)" size={32} />
+            </header>
+            <h1>{entradas}</h1>
+        </section>
+        <section class="secondary">
+            <header>
+                <p>Saídas</p>
+                <ArrowCircleDown color="var(--red)" size={32} />
+            </header>
+            <h1>{saidas}</h1>
+        </section>
+        <section class={total.includes('-') ? 'red' : 'green'}>
+            <header>
+                <p>Total</p>
+                <CurrencyDollar size={32} />
+            </header>
+            <h1>{total}</h1>
+        </section>
+    {/if}
+</grid>

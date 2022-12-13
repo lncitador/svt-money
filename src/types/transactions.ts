@@ -1,22 +1,50 @@
-import type { UseQueryStoreResult } from "@sveltestack/svelte-query";
+import type { UseQueryStoreResult } from '@sveltestack/svelte-query'
+import type { SortOrder } from '.'
 
-export enum TransactionsType {
-    deposit = 'deposit',
-    withdraw = 'withdrawal',
-    payment = 'payment',
-    invoice = 'invoice'
-}
-
+export type TransactionsType = "DEPOSIT" | "WITHDRAWAL"
 export interface Transactions {
-    title: string;
-    value: number;
+    id: string
+    title: string
+    value: number
     type: TransactionsType
-    category: string;
-    date: Date;
+    category: string
+    createdAt: Date
 }
 
 export type TransactionsStore = UseQueryStoreResult<Transactions[]>
 
-export type TransactionMutation = Transactions & {
-    email: string;
+export type TransactionCreateInput = {
+    data: Omit<Transactions, 'id' | 'createdAt'> & {
+        sub: string,
+        createdAt?: string
+    }
+}
+
+export type TransactionCreateInputResponse = {
+    createTransaction: Transactions
+}
+
+export type TransactionOrderByInput = {
+    createdAt?: SortOrder
+}
+
+type TransactionWhereInput = {
+    _search?: string
+    authUser?: {
+        sub?: string
+    }
+}
+
+export type TransactionQueryVariables = {
+    where?: TransactionWhereInput
+    after?: number
+    before?: number
+    first?: number
+    last?: number
+    skip?: number
+    orderBy?: TransactionOrderByInput
+}
+
+export type FilterTransactionResponse = {
+    transactions: Transactions[]
 }

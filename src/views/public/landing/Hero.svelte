@@ -1,12 +1,5 @@
-<section class="container">
-    <hgroup>
-        <h2><strong>Svelte</strong> Money</h2>
-        <p>Gerencie suas finanças de forma simples e fácil</p>
-    </hgroup>
-</section>
-
 <style lang="scss">
-    $img: url("https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80");
+    $img: url('https://images.unsplash.com/photo-1547394765-185e1e68f34e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80');
 
     hgroup {
         margin-top: -5rem;
@@ -28,7 +21,7 @@
             font-weight: 700;
 
             strong {
-                color: #FF3E00;
+                color: #ff3e00;
             }
         }
 
@@ -42,3 +35,10 @@
         }
     }
 </style>
+
+<section class="container">
+    <hgroup>
+        <h2><strong>Svelte</strong> Money</h2>
+        <p>Gerencie suas finanças de forma simples e fácil</p>
+    </hgroup>
+</section>

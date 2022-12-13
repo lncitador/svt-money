@@ -1,25 +1,3 @@
-<script lang="ts">
-    import type { Auth0Client } from "@auth0/auth0-spa-js";
-    import { UserCircle } from "phosphor-svelte";
-    import auth from "src/lib/service/auth";
-
-    export let auth0Client: Auth0Client;
-
-    const handleClickLogout = async () => {
-        await auth.logout(auth0Client);
-    };
-</script>
-
-<details>
-    <summary aria-haspopup="listbox">
-        <UserCircle />
-    </summary>
-    <ul role="listbox" class="menu">
-        <li><a href="perfil">Perfil</a></li>
-        <li><a href="sair" on:click={handleClickLogout}>Sair</a></li>
-    </ul>
-</details>
-
 <style lang="scss">
     $color_1: #fff;
     $color_2: var(--gray600);
@@ -41,6 +19,12 @@
             &:focus {
                 outline: none;
             }
+
+            img {
+                width: 3rem;
+                height: 3rem;
+                border-radius: 50%;
+            }
         }
 
         ul {
@@ -57,7 +41,7 @@
             z-index: 1;
 
             &::before {
-                content: "";
+                content: '';
                 position: absolute;
                 top: -6px;
                 left: 42%;
@@ -91,3 +75,35 @@
         }
     }
 </style>
+
+<script lang="ts">
+    import type { Auth0Client } from '@auth0/auth0-spa-js'
+    import { UserCircle } from 'phosphor-svelte'
+    import { user } from 'src/lib/store'
+    import auth from 'src/lib/service/auth'
+    import { navigateTo } from 'svelte-router-spa'
+
+    export let auth0Client: Auth0Client
+
+    const handleClickLogout = async () => {
+        await auth.logout(auth0Client)
+    }
+
+    const handleClickProfile = () => {
+        navigateTo('/profile')
+    }
+</script>
+
+<details>
+    <summary aria-haspopup="listbox">
+        {#if $user}
+            <img src={`${$user?.picture ?? ''}`} alt={$user.name} />
+        {:else}
+            <UserCircle />
+        {/if}
+    </summary>
+    <ul role="listbox" class="menu">
+        <li><a href="perfil" on:click={handleClickProfile}>Perfil</a></li>
+        <li><a href="sair" on:click={handleClickLogout}>Sair</a></li>
+    </ul>
+</details>
